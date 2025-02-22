@@ -1,6 +1,82 @@
-// csv.h (public domain - https://github.com/angelcaru/csv.h)
-// TODO: write documentation
+/* csv.h (public domain - https://github.com/angelcaru/csv.h)
+      Header-only library for parsing CSV (comma-separated values) files in C
 
+   # Simple Example
+   ```c
+   #define CSV_IMPLEMENTATION
+   #include "csv.h"
+
+   int main(void) {
+       Csv_String_View file = ...; // read the file
+       Csv_String_View row = {0};
+       while (csv_next_row(&file, &row, csv_default_config)) {
+           printf("New Row\n");
+           Csv_String_View item = {0};
+           while (csv_next_item(&row, &item, csv_default_config)) {
+               printf("Item: %.*s\n", (int)item.count, item.data);
+           }
+       }
+
+       return 0;
+   }
+   ```
+
+   # CSV_FILL_STRUCT technology
+   This library has a macro called `CSV_FILL_STRUCT`. It allows you to fill a struct of your making with fields from a CSV row:
+   ```c
+   #define CSV_IMPLEMENTATION
+   #include "csv.h"
+
+   typedef struct {
+       // These are the only three supported types currently
+       Csv_String_View name;
+       int id;
+       float balance;
+   } User;
+
+   int main(void) {
+       Csv_String_View file = ...; // read the file
+       Csv_String_View row = {0};
+       while (csv_next_row(&file, &row, csv_default_config)) {
+           User user;
+           CSV_FILL_STRUCT(row, csv_default_config, user, CSVF(name), CSVF(id), CSVF(balance));
+
+           printf("User %.*s with ID %d has %.2f€\n", (int)user.name.count, user.name.data, user.id, user.balance);
+       }
+
+       return 0;
+   }
+   ```
+
+   # Using your own String_View
+   You can configure csv.h to use whatever String_View you want by defining the Csv_String_View macro:
+   ```c
+   #define NOB_IMPLEMENTATION // nob.h library by Alexey Kutepov (Tsoding)
+   #include "nob.h"
+
+   #define Csv_String_View Nob_String_View
+   #define CSV_IMPLEMENTATION
+   #include "csv.h"
+   ```
+   The default Csv_String_View is intentionally identical to nob's Nob_String_View, so you can do this substitution quite simply.
+   If you want to use a different String_View with different names for the fields, you must define `csv_sv_data()`, `csv_sv_count()`,
+     and `csv_sv_from_parts()`
+   ```c
+   typedef struct {
+       const char *ptr;
+       size_t length;
+   } My_String_View;
+
+   #define Csv_String_View My_String_View
+   // csv_sv_{data|count} macros must be lvalues (aka, you must be able to do `csv_sv_{data|count}(sv) = ...`)
+   #define csv_sv_data(sv) (sv).ptr
+   #define csv_sv_count(sv) (sv).length
+   #define csv_sv_from_parts(ptr_, length_) ((My_String_View) { .ptr = ptr_, .length = length_ })
+   #define CSV_IMPLEMENTATION
+   #include "csv.h"
+   ```
+
+*/
 #ifndef CSV_H_
 #define CSV_H_
 
