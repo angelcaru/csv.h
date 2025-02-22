@@ -48,5 +48,10 @@ int main(int argc, char **argv) {
     }
 
     nob_log(ERROR, "Unknown example: %s", arg);
-    return 0;
+    nob_log(INFO, "List of examples:");
+    for (size_t i = 0; i < ARRAY_LEN(examples); i++) {
+        const char *example = examples[i];
+        nob_log(INFO, "  %s", example);
+    }
+    return 1;
 }
