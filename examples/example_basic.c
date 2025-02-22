@@ -30,14 +30,14 @@ bool read_entire_file(const char *path, Csv_String_View *sv) {
     sv->count = m;
 
 defer:
-    if (!result) fprintf(stderr, "ERROR: Could not read file %s: %s", path, strerror(errno));
+    if (!result) fprintf(stderr, "ERROR: Could not read file %s: %s\n", path, strerror(errno));
     if (f) fclose(f);
     return result;
 }
 
 int main(void) {
     Csv_String_View file = {0};
-    if (!read_entire_file("test.csv", &file)) return 1;
+    if (!read_entire_file("examples/test.csv", &file)) return 1;
 
     Csv_String_View row = {0};
     while (csv_next_row(&file, &row, csv_default_config)) {
