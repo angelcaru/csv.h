@@ -48,6 +48,30 @@
    }
    ```
 
+   # Using a different Csv_Config
+   This example parses TSV (tab-separated values) instead of CSV (comma-separated values)
+   ```c
+   #define CSV_IMPLEMENTATION
+   #include "csv.h"
+
+   int main(void) {
+       Csv_Config tsv = csv_default_config;
+       tsv.col_delim = '\t';
+
+       Csv_String_View file = ...; // read the file
+       Csv_String_View row = {0};
+       while (csv_next_row(&file, &row, csv_default_config)) {
+           printf("New Row\n");
+           Csv_String_View item = {0};
+           while (csv_next_item(&row, &item, csv_default_config)) {
+               printf("Item: %.*s\n", (int)item.count, item.data);
+           }
+       }
+
+       return 0;
+   }
+   ```
+
    # Using your own String_View
    You can configure csv.h to use whatever String_View you want by defining the Csv_String_View macro:
    ```c
