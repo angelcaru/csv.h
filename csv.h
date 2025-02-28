@@ -28,7 +28,7 @@
    #include "csv.h"
 
    typedef struct {
-       // These are the only three supported types currently
+       // Currently the only supported types are String_View, int, long, and float
        Csv_String_View name;
        int id;
        float balance;
@@ -146,6 +146,7 @@ static_assert(CSV_SUPPORTED_TYPES == 3, "Exhaustive handling of supported types 
 #define CSV__TYPE(val) _Generic((val), \
         int: "int",     \
         float: "float",   \
+        long: "long",   \
         Csv_String_View: "string_view"   \
     )
 
@@ -251,10 +252,13 @@ void csv__fill_struct(void *out_v, Csv_String_View *row, Csv_Config config, cons
         static_assert(CSV_SUPPORTED_TYPES == 3, "Exhaustive handling of supported types in csv__fill_struct()");
         if (strcmp(field.type, "int") == 0) {
             int val = atoi(csv_sv_data(item));
-            memcpy(field_loc, &val, sizeof(int));
+            memcpy(field_loc, &val, sizeof(val));
+        } else if (strcmp(field.type, "long") == 0) {
+            long val = atol(csv_sv_data(item));
+            memcpy(field_loc, &val, sizeof(val));
         } else if (strcmp(field.type, "float") == 0) {
             float val = (float)atof(csv_sv_data(item));
-            memcpy(field_loc, &val, sizeof(float));
+            memcpy(field_loc, &val, sizeof(val));
         } else if (strcmp(field.type, "string_view") == 0) {
             memcpy(field_loc, &item, sizeof(Csv_String_View));
         } else {
